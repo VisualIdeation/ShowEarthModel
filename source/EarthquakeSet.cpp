@@ -392,13 +392,14 @@ void EarthquakeSet::initContext(GLContextData& contextData) const
 		for(std::vector<Event>::const_iterator eIt=events.begin();eIt!=events.end();++eIt,++vPtr)
 			{
 			/* Map the event's magnitude to color: */
-			const int numColors=5;
+			const int numColors=6;
 			static const Vertex::Color magColorMap[numColors]=
 				{
 				Vertex::Color(0,255,0),
 				Vertex::Color(0,255,255),
 				Vertex::Color(0,0,255),
 				Vertex::Color(255,0,255),
+				Vertex::Color(255,255,0),
 				Vertex::Color(255,0,0)
 				};
 			if(eIt->magnitude<=magnitudeMin)
