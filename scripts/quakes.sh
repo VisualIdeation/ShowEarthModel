@@ -1,1 +1,1 @@
-./bin/ShowEarthModel -quakes ../data/Earthquakes/quakes.txt
+./bin/ShowEarthModel -creditFile scripts/quakes.credit -quakes ../data/Earthquakes/quakes.txt

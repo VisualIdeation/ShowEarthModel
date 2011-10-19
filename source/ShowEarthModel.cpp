@@ -29,8 +29,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <iomanip>
 #include <vector>
 #include <Misc/FunctionCalls.h>
-#include <Misc/File.h>
 #include <Misc/ThrowStdErr.h>
+#include <Misc/File.h>
+#include <Misc/StandardValueCoders.h>
+#include <Misc/ConfigurationFile.h>
 #include <Math/Math.h>
 #include <Math/Constants.h>
 #include <Geometry/Geoid.h>
@@ -64,6 +66,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if CLIP_SCREEN
 #include <Vrui/VRScreen.h>
 #endif
+#include <Vrui/VRWindow.h>
 #include <Vrui/Tools/SurfaceNavigationTool.h>
 #include <Vrui/Vrui.h>
 #include <Vrui/Application.h>
@@ -617,8 +620,46 @@ GLPolylineTube* ShowEarthModel::readSensorPathFile(const char* sensorPathFileNam
 	return result;
 	}
 
+void ShowEarthModel::assignCreditInformation(void) const
+	{
+
+	if (creditInformation)
+		{
+
+		/* Assign Credit Information */
+		for(int i=0;i<Vrui::getNumWindows();i++)
+			{
+			Vrui::VRWindow * window = Vrui::getWindow(i);
+			window->setCreditTitle((creditTitle).c_str());
+			window->setCreditData((creditData).c_str());
+			window->setCreditGraphics((creditGraphics).c_str());
+			}
+		}
+	}
+
+void ShowEarthModel::readCreditFile(const char* creditFileName)
+	{
+	try
+		{
+		std::string str(creditFileName);
+		/* Open credit file: */
+		Misc::ConfigurationFile creditFile((str).c_str());
+		Misc::ConfigurationFileSection credit=creditFile.getSection("/Credit");
+		/* Override program settings from credit file: */
+		creditTitle=credit.retrieveValue<std::string>("./title","title");
+		creditData=credit.retrieveValue<std::string>("./data","data authors");
+		creditGraphics=credit.retrieveValue<std::string>("./graphics","graphics authors");
+		creditInformation=true;
+		}
+	catch(std::runtime_error err)
+		{
+		std::cerr<<"Caught exception "<<err.what()<<" in ShowEarthModel::readCreditFile"<<std::endl;
+		}
+	}
+
 ShowEarthModel::ShowEarthModel(int& argc,char**& argv,char**& appDefaults)
 	:Vrui::Application(argc,argv,appDefaults),
+	 creditInformation(false),
 	 scaleToEnvironment(true),
 	 rotateEarth(true),
 	 lastFrameTime(0.0),rotationAngle(0.0f),rotationSpeed(5.0f),
@@ -676,6 +717,11 @@ ShowEarthModel::ShowEarthModel(int& argc,char**& argv,char**& appDefaults)
 					++i;
 					colorMask[j]=float(atof(argv[i]));
 					}
+				}
+			else if(strcasecmp(argv[i]+1,"creditFile")==0)
+				{
+				++i;
+				readCreditFile(argv[i]);
 				}
 			else
 				std::cout<<"Unrecognized switch "<<argv[i]<<std::endl;
@@ -838,6 +884,7 @@ void ShowEarthModel::initContext(GLContextData& contextData) const
 	glNewList(dataItem->displayListIdBase+3,GL_COMPILE);
 	glDrawSphereIcosahedron(1221.0f,8);
 	glEndList();
+	assignCreditInformation();
 	}
 
 void ShowEarthModel::toolCreationCallback(Vrui::ToolManager::ToolCreationCallbackData* cbData)

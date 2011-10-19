@@ -127,6 +127,10 @@ class ShowEarthModel:public Vrui::Application,public GLObject
 	friend class DataLocator;
 	
 	/* Elements: */
+	bool creditInformation;
+	std::string creditTitle;
+	std::string creditData;
+	std::string creditGraphics;
 	std::vector<EarthquakeSet*> earthquakeSets; // Vector of earthquake sets to render
 	std::pair<double,double> earthquakeTimeRange; // Range to earthquake event times
 	std::vector<PointSet*> pointSets; // Vector of additional point sets to render
@@ -179,6 +183,8 @@ class ShowEarthModel:public Vrui::Application,public GLObject
 	void updateCurrentTime(void); // Updates the current time text field
 	GLMotif::PopupWindow* createAnimationDialog(void); // Create the animation dialog
 	GLPolylineTube* readSensorPathFile(const char* sensorPathFileName,double scaleFactor);
+	void assignCreditInformation(void) const;
+	void readCreditFile(const char * creditFileName);
 	
 	/* Constructors and destructors: */
 	public:
